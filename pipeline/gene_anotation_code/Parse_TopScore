@@ -1,0 +1,74 @@
+#! /usr/local/bin/perl -w
+
+use warnings;
+use strict;
+
+my ($input, $output, $equal_counter, $pre_data, $leng, $div, $aa, $all, $que, $sco) = 0;
+my (@ar) = ();
+my (%query_Hash, %all_Hash) = ();
+
+$input = $ARGV[0];
+open(INPUT, "$input") or die "Can't open \"$input\"\n";
+
+$output = "$input.parsed";
+open(OUTPUT, ">$output") or die "Can't open \"$output\"\n";
+
+$equal_counter = 0;
+$pre_data = 0;
+open(INPUT, "$input") or die "Can't open \"$input\"\n";
+while(<INPUT>){
+	if(/^((\S.+?)\s+.+?\s+\S+\s+(\S+))\s*$/){
+		$all = $1;
+		$que = $2;
+		$sco = $3;
+		if(exists($query_Hash{$2})){
+			if($query_Hash{$2} == $3){
+				$all_Hash{$2} = "$all_Hash{$2}\n$1";
+				$equal_counter = 2;
+			}
+		}
+		else{
+			if($equal_counter == 0){
+				if($pre_data == 0){
+					$pre_data = $2;
+					$equal_counter = 1;
+					$query_Hash{$2} = $3;
+					$all_Hash{$2} = $1;
+				}
+			}
+			else{
+				if($equal_counter == 1){
+					print OUTPUT "$all_Hash{$pre_data}\t1\n";
+					$equal_counter = 2;
+					$pre_data = $que;
+					$query_Hash{$que} = $sco;
+					$all_Hash{$que} = $all;
+				}
+				else{
+				@ar = ();
+				@ar = split(/\n/,$all_Hash{$pre_data});
+				$leng = scalar(@ar);
+				$div = 1/$leng;
+				foreach $aa (@ar){
+					print OUTPUT "$aa\t$div\n";
+				}
+				$pre_data = $que;
+				$equal_counter = 2;
+				$query_Hash{$que} = $sco;
+				$all_Hash{$que} = $all;
+				}
+			}
+		}
+	}
+}
+close INPUT;
+@ar = ();
+@ar = split(/\n/,$all_Hash{$pre_data});
+$leng = scalar(@ar);
+$div = 1/$leng;
+foreach $aa (@ar){
+	print OUTPUT "$aa\t$div\n";
+}
+close OUTPUT;
+exit;
+
